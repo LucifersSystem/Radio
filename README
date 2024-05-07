@@ -1,0 +1,49 @@
+This radio system was made by lucifer6661771 so please respect it and don't resell this.
+ALL RIGHTS RESERVED.
+
+Framework Compatability:
+QB-CORE
+--------------------------INSTALL INSTRUCTIONS---------------------------------
+
+1: CREATE A MYSQL DB;
+2: CREATE AND ADD A DISCORD BOT WITH ADMIN PERMS (PREFERABLY IN-CASE ANY ISSUES) TO YOUR SERVER, AND GATHER THE BOT CLIENTID, SERVER UUID, THE BOT TOKEN,
+3: GATHER AND CREATE YOUR DB LOGIN CREDS,
+4: SETUP A NODEJS MACHINE OR CONTAINER RUNNING V20.11.0, NPM V10.2.4 WITH A MAX OF 1GB RAM, 1GB STORAGE OR GET HOSTING FROM OUR OFFICIAL HOSTING PARTNER: RIGHT WAY TOO HOST https://discord.gg/6HuJcGQwcw
+5: EDIT THE FILE IN THE FOLDER "Fivem_Side" >>  "[Radio]" >> "LR" >> "nui" >> client.html on line 8 -- Change to the correct IP or subdomain,
+6: EDIT THE FILE IN THE FOLDER "Fivem_Side" >>  "[Radio]" >> "LR" >> "nui" >> client.html on line 9 -- Change to the correct HTTP port that you will soon set (DONT USE HTTPS AS IT'S NOT FINISHED),
+7: EDIT THE FILE IN THE FOLDER "Fivem_Side" >>  "[Radio]" >> "LR" >> "nui" >> client.html on line 10 -- Change the API Key found in your config file, or in console,
+8: Move the Folder "[Radio]" containing the asset files to the Fivem resources folder,
+9: Run the Node project using "npm start" while inside the directory "Radio_Project" - It for the first time will ask you to run through a setup and it will create a config file
+
+Discord Commands:
+/addmod -- Allows the owner to add someone to manage permanent radio channels such as for example "Upper LS", "Lower BC", "Swat",
+/delmod -- Allows ONLY the owner to remove a radio mod,
+/assigntemp -- Allows the person running the command to Assign someone of their choosing to their own radio channels for whatever RP the person is doing, (Instantly reflects on client)
+/delchannel -- Allows only authorized people to delete and remove channels. (Instantly reflects on client)
+/listchannels -- Lists only the permanent radio channels,
+/mytemp -- Shows the persons created temp channel if any exists,
+/newchannel -- Allows only authorized people to create permanent radio channels, (Instantly reflects on client)
+/newtemp -- Allows ANYONE to make and create their own temp channel for any RP, or scenario. (Instantly reflects on client)
+/ver -- Shows the current radio server ver,
+/viewmods -- Shows the current assigned mods for the radio system
+/sendmsg -- Allows anyone to send a message to a radio user. (Instantly reflects on client)
+
+EXAMPLE HTTP-API CALLS:
+SEND RADIO MESSAGE (POST) http://127.0.0.1:1000/api/<APIKEY>/radio/users/msg/<SENDER DISCORD ID>/<RECPT DISCORD ID>/<MESSAGE>/
+GET USER RADIO MESSAGES (GET) http://127.0.0.1:1000/api/<APIKEY>/radio/users/msg/<DISCORD ID>/
+DELETE USER RADIO MESSAGE (DELETE) http://127.0.0.1:1000/api/<APIKEY>/radio/users/msg/<DISCORD ID>/<INDEX STARTING AT 0>/
+GET COMMUNITY RADIO CHANNELS (GET) http://127.0.0.1:1000/api/<APIKEY>/radio/channels/ 
+GET RADIO USER PROFILES (GET) http://127.0.0.1:1000/api/<APIKEY>/radio/users/
+
+In-Game Features: 
+
+Radio User list shows on the radio screen & you can click a button and instantly create and join a private radio space with them and others connected to it,
+A Working Panic System,
+Instant Channel Sync System,
+Job-Based Radio Channels,
+Temp Radio Channels created from in-discord reflecting instantly in-game,
+Physical and Vehicle Radio models that are easy to understand and work as almost everyone uses them because they are free.
+Simple and Quick integration.
+
+
+This creation of the radio was inspired by many radio systems out there, and my close friend Pyxxi. During the creation of this radio, I was thinking about how theirs not a single free radio system out there that does not suck, so I wanted to change that and intern I created this radio system that is fully discord-integrated and does not require a billion configs and one to where you and your members can have a realistic radio system but also one that is fully integrated with discord allowing for freedom of development and actual fun!.

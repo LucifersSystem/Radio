@@ -1,0 +1,5 @@
+is_global = true
+build_property.RootNamespace = LuciferSystems.Server
+build_property.ProjectDir = D:\gitprojects\Public-Radio-System\Client_source\Server\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 

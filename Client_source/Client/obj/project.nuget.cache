@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "ojC5+aHnyrWbYcd+YRV+wrSELv5mt8NGGydBgXAwLhZUwKRtO78WxT8W8k8NWcr/Ru26eBlSgFLqS/6krRB0hg==",
+  "success": true,
+  "projectFilePath": "D:\\gitprojects\\Public-Radio-System\\Client_source\\Client\\LuciferSystems.Client.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\12243\\.nuget\\packages\\citizenfx.core.client\\1.0.7999\\citizenfx.core.client.1.0.7999.nupkg.sha512",
+    "C:\\Users\\12243\\.nuget\\packages\\microsoft.netframework.referenceassemblies\\1.0.3\\microsoft.netframework.referenceassemblies.1.0.3.nupkg.sha512",
+    "C:\\Users\\12243\\.nuget\\packages\\microsoft.netframework.referenceassemblies.net452\\1.0.3\\microsoft.netframework.referenceassemblies.net452.1.0.3.nupkg.sha512",
+    "C:\\Users\\12243\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\12243\\.nuget\\packages\\citizenfx.framework.client\\0.2.3\\citizenfx.framework.client.0.2.3.nupkg.sha512"
+  ],
+  "logs": []
+}

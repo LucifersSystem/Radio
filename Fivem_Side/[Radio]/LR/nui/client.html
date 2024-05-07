@@ -1,0 +1,718 @@
+<!doctype html>
+
+
+<html style="display: none">
+<head>
+    <script>
+        let currentVolume=1;
+        let RadioServerIP = "127.0.0.1";
+        let RadioServerPort = "1000";
+        let CommunityAPIKey = "6551c6f3-ef12-4c74-8e81-8b3d9f5df00b";
+
+        let Priority_on = "http://"+RadioServerIP+":"+RadioServerPort+"/sounds/priority/on.mp3"
+        let Ptt_on = "http://"+RadioServerIP+":"+RadioServerPort+"/sounds/ptt/on.mp3"
+        let Ptt_off = "http://"+RadioServerIP+":"+RadioServerPort+"/sounds/ptt/off.mp3"
+        let Alert_Sound = "http://"+RadioServerIP+":"+RadioServerPort+"/sounds/alert/on.mp3"
+        let Rescue_on = "http://"+RadioServerIP+":"+RadioServerPort+"/sounds/rescue/on.mp3"
+
+        let Notification_NS = "http://"+RadioServerIP+":"+RadioServerPort+"/com";
+        let Dynamic_NS = "http://"+RadioServerIP+":"+RadioServerPort+"/dynamic-";
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tunajs/1.0.11/tuna-min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="jq.js"></script>
+    <script src="socket.js"></script>
+    <script src='voice.js'></script>
+
+    <script>
+        navigator.getUserMedia = ( navigator.getUserMedia ||
+            navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia);
+
+        attachMediaStream = function(element, stream) {
+            element.srcObject = stream;
+        };
+
+        navigator.getUserMedia({"audio":true, "video":false},
+            function(stream) { /* user accepted access to a/v */
+                local_media_stream = stream;
+                const local_media = $(`<audio style='display:none'>`);
+                local_media.attr("muted", "true"); /* always mute ourselves by default */
+                $('body').append(local_media);
+                attachMediaStream(local_media[0], stream);
+                local_media_stream.getAudioTracks()[0].enabled = false;
+            },
+            function() { /* user denied access to a/v */
+                console.log("Access denied for audio/video");
+            });
+    </script>
+    <style>
+    </style>
+
+
+    <script>
+
+        let Curr_PlayerList = new Array();
+        let currChannel = 0;
+        let pttValue = false;
+        let Int_Channels = new Array();
+        let Int_PlrMsgs = new Array();
+        let Int_CommunityName = null;
+        let Self_DiscordID = null;
+        let Self_FivemLicense = null;
+        let Self_Curr_Job = null;
+        let Is_Conn = false;
+        let Is_Debug = false;
+        let isPriority_current = false;
+        let Is_ElseTalking = false;
+        let Is_SelfTalking = false;
+        let NetAdd_Data = null;
+
+
+        var isAuth = false;
+        var _Dynamic_RSNS = null; // Dynamic (Radio Server Name Space)
+        var _Notification_NS = null; //Communication and Notification Space
+        function init(DiscordID, FivemLicense) {
+
+            _Notification_NS = io(Notification_NS, {transports: ['websocket']});
+            _Dynamic_RSNS = io(Dynamic_NS+"6666666666666", {transports: ['websocket']});
+
+            fetch(`https://${GetParentResourceName()}/radiodata`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8',
+                },
+                body: JSON.stringify({
+                    msgType: 'connecting'
+                })
+            }).then(resp => resp.json()).then(resp => function (){
+                if(Is_Debug){
+                    console.log(resp);
+                }
+            });
+
+            _Notification_NS.on("PlayerList_Update", function (ret){
+                if(String(ret[0].DiscordID).includes(String(Self_DiscordID))) {
+                    for (let p = 0; p <= Curr_PlayerList.length; p++) {
+                        Curr_PlayerList.pop();
+                    }
+                    for (let x = 0; x <= ret[0].data[1].length - 1; x++) {
+                        Curr_PlayerList.push(ret[0].data[1][x]);
+                    }
+                    console.log("Updated Player List");
+                }
+            });
+
+            _Notification_NS.on('connect', function () {
+                Is_Conn = true;
+                NetAdd_Data = [{
+                    key: CommunityAPIKey,
+                    DiscordID: DiscordID
+                }];
+                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: JSON.stringify({
+                        msgType: 'Authenticating'
+                    })
+                }).then(resp => resp.json()).then(resp => function (){
+                    if(Is_Debug){
+                        console.log(resp);
+                    }
+                });
+                if(Self_Curr_Job != null) {
+                    var o = [{
+                        Key: CommunityAPIKey,
+                        DiscordID: DiscordID,
+                        FiveMID: FivemLicense,
+                        CurrJob: Self_Curr_Job
+                    }]
+                    _Notification_NS.emit("Auth", o);
+
+                }
+            });
+            _Notification_NS.on('connect_error', function (){
+                new Audio("alert.mp3").play();
+                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: JSON.stringify({
+                        msgType: 'Server_LostConn'
+                    })
+                }).then(resp => resp.json()).then(resp => function (){
+                    if(Is_Debug){
+                        console.log(resp);
+                    }
+                });
+            });
+            _Dynamic_RSNS.on('connect_error', function (){
+                new Audio("alert.mp3").play();
+                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: JSON.stringify({
+                        msgType: 'Server_LostConn'
+                    })
+                }).then(resp => resp.json()).then(resp => function (){
+                    if(Is_Debug){
+                        console.log(resp);
+                    }
+                });
+            });
+
+            _Notification_NS.on("Trigger_Priority", function(){
+                console.log("GOT NETWORK PRIORITY CALL");
+                new Audio(Priority_on).play();
+                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: JSON.stringify({
+                        msgType: 'priority_active'
+                    })
+                }).then(resp => resp.json()).then(resp => function () {
+                    if (Is_Debug) {
+                        console.log(resp);
+                    }
+                });
+            });
+
+            _Notification_NS.on("Selected_PLALRT", function (data){
+               let d = data[0];
+               if(String(d.ODiscordID).includes(Self_DiscordID)){
+                    new Audio(Alert_Sound).play();
+               }
+            });
+
+            _Notification_NS.on('Auth_Success', function (data){
+                isAuth = true;
+                let res = data[0];
+                Int_CommunityName = res.CommunityName;
+                let channels = res.Channels;
+
+                Int_Channels.length = 0;
+
+                for(let x = 0; x<= channels.length -1;x++){
+                    Int_Channels.push(channels[x]);
+                }
+
+                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: JSON.stringify({
+                        msgType: 'Authenticated',
+                        CommunityName: Int_CommunityName,
+                        MaxChannels: res.Channels.length
+                    })
+                }).then(resp => resp.json()).then(resp => function (){
+                    if(Is_Debug){
+                        console.log(resp);
+                    }
+                });
+            });
+
+            _Notification_NS.on('Auth_Err', function (data){
+                let res = data[0];
+
+                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: JSON.stringify({
+                        msgType: 'Auth_Error',
+                        error: res.message
+                    })
+                }).then(resp => resp.json()).then(resp => function (){
+                    if(Is_Debug){
+                        console.log(resp);
+                    }
+                });
+            });
+
+            _Notification_NS.on("CH_UPDATE", function(data){
+                let res = data[0];
+                let channels = res.Channels;
+
+                console.log(channels.length);
+
+                if(channels.length <= 0){
+                    var SetDefault_Jobs = [{
+                        DiscordID: Self_DiscordID,
+                        Job: "Default"
+                    }];
+                    _Notification_NS.emit("CH_GET", SetDefault_Jobs);
+                }else {
+
+                    for (let p = 0; p <= Int_Channels.length - 1; p++) {
+                        Int_Channels.pop();
+                    }
+
+                    for (let x = 0; x <= channels.length - 1; x++) {
+                        Int_Channels.push(channels[x]);
+                    }
+
+                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=UTF-8',
+                        },
+                        body: JSON.stringify({
+                            msgType: 'Radio_MaxUpdate',
+                            MaxChannels: Int_Channels.length
+                        })
+                    }).then(resp => resp.json()).then(resp => function () {
+                        if (Is_Debug) {
+                            console.log(resp);
+                        }
+                    });
+
+                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=UTF-8',
+                        },
+                        body: JSON.stringify({
+                            msgType: 'Radio_Notifcation',
+                            message: "Radio Updated"
+                        })
+                    }).then(resp => resp.json()).then(resp => function () {
+                        if (Is_Debug) {
+                            console.log(resp);
+                        }
+                    });
+
+                }
+            });
+
+            _Notification_NS.on("New_Message", function (data){
+                if(String(data[0].DiscordID).includes(Self_DiscordID)) {
+                    var Nm_Obj = [{
+                        Msg: data[0].Msg,
+                        Mtype: "New Message"
+                    }];
+                    Int_PlrMsgs.push(Nm_Obj);
+                }
+            });
+
+            _Notification_NS.on("Update_Required", function (){
+                var Update_RequiredJob = [{
+                    DiscordID: Self_DiscordID,
+                    Job: Self_Curr_Job
+                }];
+                _Notification_NS.emit("CH_GET", Update_RequiredJob);
+            });
+
+            _Notification_NS.on("TEMP_CH_UPDATE", function(data){
+                let res = data[0];
+
+                if(String(Self_DiscordID).includes(String(res.DiscordID))) {
+                    _Dynamic_RSNS.disconnect();
+                    _Dynamic_RSNS = io(Dynamic_NS + String(res.ChannelID), {transports: ['websocket']});
+                    voice.init(_Dynamic_RSNS);
+
+
+                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=UTF-8',
+                        },
+                        body: JSON.stringify({
+                            msgType: 'Assign_Channel',
+                            Channel: res.ChannelName
+                        })
+                    }).then(resp => resp.json()).then(resp => function () {
+                        if (Is_Debug) {
+                            console.log(resp);
+                        }
+                    });
+
+                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=UTF-8',
+                        },
+                        body: JSON.stringify({
+                            msgType: 'Radio_Notifcation',
+                            message: "Assigned Temp"
+                        })
+                    }).then(resp => resp.json()).then(resp => function (){
+                        if(Is_Debug){
+                            console.log(resp);
+                        }
+                    });
+                }
+            });
+
+
+
+
+
+        }
+
+
+        setTimeout(()=>{
+            window.addEventListener('message', function(event) {
+                try {
+                    switch (event.data.msgType) {
+                        case "error_rec":
+                            let errraw = event.data;
+                            let error = errraw.error;
+                            let hash = errraw.hash;
+                            let p1 = [{
+                                DiscordID: Self_DiscordID,
+                                FiveM: Self_FivemLicense,
+                                Error: error,
+                                Hash: hash
+                            }]
+                            _Notification_NS.emit("EH", p1);
+                            break;
+                        case "setChannel":
+                            let reqchannel = event.data.channel;
+                            _Dynamic_RSNS.disconnect();
+                            let channel = reqchannel - 1;
+                            if (reqchannel > Int_Channels.length) {
+                                channel = 0;
+                            }
+                            _Dynamic_RSNS = io(Dynamic_NS + Int_Channels[channel][0].ChannelID, {transports: ['websocket']});
+                            fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json; charset=UTF-8',
+                                },
+                                body: JSON.stringify({
+                                    msgType: 'Assign_Channel',
+                                    Channel: Int_Channels[channel][0].ChannelName
+                                })
+                            }).then(resp => resp.json()).then(resp => function () {
+                                if (Is_Debug) {
+                                    console.log(resp);
+                                }
+                            });
+                            _Dynamic_RSNS.emit("Net_Add", NetAdd_Data);
+                            voice.init(_Dynamic_RSNS);
+
+                            break;
+                        case "setPTT":
+                            pttValue = event.data.status;
+                            if (pttValue) {
+                                if (!Is_ElseTalking) {
+                                    var Ptt_obj = [{
+                                        DiscordID: Self_DiscordID,
+                                        Type: "PTT",
+                                        Status: true
+                                    }];
+                                    Is_SelfTalking = true;
+                                    _Dynamic_RSNS.emit("PTT", Ptt_obj);
+                                    new Audio(Ptt_on).play();
+                                } else {
+                                    //PLAY AUDIO FOR DENY AND TRIGIGER FUNC
+                                    new Audio(Alert_Sound).play();
+                                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json; charset=UTF-8',
+                                        },
+                                        body: JSON.stringify({
+                                            msgType: 'Deny_PTT'
+                                        })
+                                    }).then(resp => resp.json()).then(resp => function () {
+                                        if (Is_Debug) {
+                                            console.log(resp);
+                                        }
+                                    });
+                                }
+                            } else {
+                                if (Is_SelfTalking) {
+                                    var Rel_PTT_Obj = [{
+                                        DiscordID: Self_DiscordID,
+                                        Type: "PTT",
+                                        Status: false
+                                    }];
+                                    Is_SelfTalking = false;
+                                    _Dynamic_RSNS.emit("PTT", Rel_PTT_Obj);
+                                    new Audio(Ptt_off).play();
+                                } else {
+                                    console.log("CANNOT STOP PTT, IF NOT SELF");
+                                }
+                            }
+                            voice.setPTT(pttValue)
+                            break;
+                        case "init":
+                            Self_DiscordID = event.data.discord;
+                            Self_FivemLicense = event.data.license;
+                            init(Self_DiscordID, Self_FivemLicense);
+                            break;
+                        case "setVol":
+                            currentVolume = event.data.volume / 100;
+                            break;
+                        case "JTC":
+                            let Input_Index_SELUSER = event.data.indx;
+                            let user = Curr_PlayerList[Input_Index_SELUSER - 1][0];
+
+                            if (String(user.DiscordID).includes(Self_DiscordID)) {
+                                var JTC_Req = [{
+                                    DiscordID: Self_DiscordID
+                                }];
+                                _Notification_NS.emit("SJTC", JTC_Req);
+                            } else {
+                                var JTC_Req = [{
+                                    DiscordID: Self_DiscordID,
+                                    ODiscordID: user.DiscordID,
+                                    OName: user.DiscordName
+                                }];
+                                _Notification_NS.emit("JTC", JTC_Req);
+                            }
+                            break;
+                        case "setJob":
+                            let Set_Jobdata = event.data;
+                            if (!String(Set_Jobdata.Char_Job).includes(Self_Curr_Job)) {
+                                Self_Curr_Job = Set_Jobdata.Char_Job;
+                                console.log("Setting Job too:  " + Self_Curr_Job);
+
+                                var Update_RequiredJob = [{
+                                    DiscordID: Self_DiscordID,
+                                    Job: Self_Curr_Job
+                                }];
+                                if (isAuth) {
+                                    console.log("REQUESTING UPDATE TO CHANNEL");
+                                    _Notification_NS.emit("CH_GET", Update_RequiredJob);
+                                }
+                            }
+                            break;
+                        case "Switch_PlayerList":
+                            try {
+                                let Input_Index = event.data.indx;
+                                if (Curr_PlayerList.length <= 0 || Input_Index <= 0 || Input_Index == null) {
+                                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json; charset=UTF-8',
+                                        },
+                                        body: JSON.stringify({
+                                            msgType: 'Error_Sel_User',
+                                            message: "Error Downloading List"
+                                        })
+                                    }).then(resp => resp.json()).then(resp => function () {
+                                        if (Is_Debug) {
+                                            console.log(resp);
+                                        }
+                                    });
+                                } else {
+                                    if (Input_Index <= Curr_PlayerList.length) {
+                                        fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json; charset=UTF-8',
+                                            },
+                                            body: JSON.stringify({
+                                                msgType: 'Sel_User',
+                                                DiscordName: String(Curr_PlayerList[Input_Index - 1][0].DiscordName),
+                                                DiscordID: String(Curr_PlayerList[Input_Index - 1][0].DiscordID),
+                                                DiscordUserName: String(Curr_PlayerList[Input_Index - 1][0].DiscordUserName)
+                                            })
+                                        }).then(resp => resp.json()).then(resp => function () {
+                                            if (Is_Debug) {
+                                                console.log(resp);
+                                            }
+                                        });
+                                    } else {
+                                        if (Curr_PlayerList >= 0) {
+                                            fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json; charset=UTF-8',
+                                                },
+                                                body: JSON.stringify({
+                                                    msgType: 'Sel_User',
+                                                    DiscordName: String(Curr_PlayerList[0][0].DiscordName),
+                                                    DiscordID: String(Curr_PlayerList[0][0].DiscordID),
+                                                    DiscordUserName: String(Curr_PlayerList[0][0].DiscordUserName)
+                                                })
+                                            }).then(resp => resp.json()).then(resp => function () {
+                                                if (Is_Debug) {
+                                                    console.log(resp);
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json; charset=UTF-8',
+                                    },
+                                    body: JSON.stringify({
+                                        msgType: 'Error_Sel_User',
+                                        message: "No Other Users on channel"
+                                    })
+                                }).then(resp => resp.json()).then(resp => function () {
+                                    if (Is_Debug) {
+                                        console.log(resp);
+                                    }
+                                });
+                            }
+                            break;
+                        case "Disconnect": {
+                            _Dynamic_RSNS.disconnect();
+                            isAuth = false;
+                            currChannel = 0;
+                            break;
+                        }
+                        case "Select_Message":
+                            let Input_Indx_RMG = event.data.indx;
+                            if(Int_PlrMsgs.length <= 0 || Input_Indx_RMG == null){
+                                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json; charset=UTF-8',
+                                    },
+                                    body: JSON.stringify({
+                                        msgType: 'No_Msgs',
+                                        Total: String(Int_PlrMsgs.length)
+                                    })
+                                }).then(resp => resp.json()).then(resp => function () {
+                                    if (Is_Debug) {
+                                        console.log(resp);
+                                    }
+                                });
+                            }else{
+                                if(parseInt(Input_Indx_RMG)-1 >= Int_PlrMsgs.length) {
+                                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json; charset=UTF-8',
+                                        },
+                                        body: JSON.stringify({
+                                            msgType: 'Show_Msg',
+                                            Message: Int_PlrMsgs[0][0].Msg,
+                                            Type: Int_PlrMsgs[0][0].Mtype
+                                        })
+                                    }).then(resp => resp.json()).then(resp => function () {
+                                        Int_PlrMsgs[0][0].Mtype = "Old Message";
+                                        if (Is_Debug) {
+                                            console.log(resp);
+                                        }
+                                    });
+                                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json; charset=UTF-8',
+                                        },
+                                        body: JSON.stringify({
+                                            msgType: 'Rst_MsgIndx'
+                                        })
+                                    }).then(resp => resp.json()).then(resp => function () {
+                                        if (Is_Debug) {
+                                            console.log(resp);
+                                        }
+                                    });
+                                }else{
+                                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json; charset=UTF-8',
+                                        },
+                                        body: JSON.stringify({
+                                            msgType: 'Show_Msg',
+                                            Message: Int_PlrMsgs[Input_Indx_RMG-1][0].Msg,
+                                            Type: Int_PlrMsgs[Input_Indx_RMG-1][0].Mtype
+                                        })
+                                    }).then(resp => resp.json()).then(resp => function () {
+                                        Int_PlrMsgs[Input_Indx_RMG-1][0].Mtype = "Old Message";
+                                        if (Is_Debug) {
+                                            console.log(resp);
+                                        }
+                                    });
+                                }
+                            }
+                            break;
+                        case "Channel_JobUpdate":
+                            var CHUPDT_Obj = [{
+                                DiscordID: Self_DiscordID,
+                                Job: Self_Curr_Job
+                            }];
+                            _Notification_NS.emit("CH_GET", CHUPDT_Obj);
+                            break;
+                        case "Enable_Debug":
+                            Is_Debug = true;
+                            console.info("DEBUG ENABLED");
+                            break;
+                        case "Disable_Debug":
+                            Is_Debug = false;
+                            console.info("DEBUG DISABLED");
+                            break;
+                        case "Sel_UserAlrt":
+                            let Input_Index_SA = event.data.indx;
+                            if (Curr_PlayerList.length <= 0 || Input_Index_SA <= 0 || Input_Index_SA == null) {
+                                //HAND ERROR
+                            } else {
+                                if (Input_Index_SA <= Curr_PlayerList.length) {
+                                    var SelUsr_AlertObj = [{
+                                        DiscordID: Self_DiscordID,
+                                        ODiscordID: String(Curr_PlayerList[Input_Index_SA - 1][0].DiscordID)
+                                    }];
+                                    _Notification_NS.emit("Sel_UserAlrt", SelUsr_AlertObj);
+                                } else {
+                                    if (Curr_PlayerList >= 0) {
+                                        var SelUsr_AlertObj = [{
+                                            DiscordID: Self_DiscordID,
+                                            ODiscordID: String(Curr_PlayerList[0][0].DiscordID)
+                                        }];
+                                        _Notification_NS.emit("Sel_UserAlrt", SelUsr_AlertObj);
+                                    }
+                                }
+                            }
+                            break;
+                        case "priority_active":
+                            let x = event.data.x;
+                            let y = event.data.y;
+                            let z = event.data.z;
+                            if (x !== undefined || y !== undefined || z !== undefined) {
+                                var p3 = [{
+                                    sourcex: x,
+                                    sourcey: y,
+                                    sourcez: z,
+                                    DiscordID: Self_DiscordID,
+                                    FivemID: Self_FivemLicense,
+                                    ChannelID: Int_Channels[currChannel][0].ChannelID
+                                }]
+                                _Notification_NS.emit("priority_active", p3);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }catch (e){
+                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=UTF-8',
+                        },
+                        body: JSON.stringify({
+                            msgType: 'Radio_Err',
+                            Error: "Unexpected_Err"
+                        })
+                    }).then(resp => resp.json()).then(resp => function () {
+                        if (Is_Debug) {
+                            console.log(resp);
+                        }
+                    });
+                }
+            });
+        },1000);
+    </script>
+</head>
+</html>
