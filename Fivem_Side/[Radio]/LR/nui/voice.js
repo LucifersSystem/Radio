@@ -1,4 +1,4 @@
-let hearself = true;
+let hearself = false;
 let previousID = "";
 
 let audioContext = new (window.AudioContext || window.webkitAudioContext)();
