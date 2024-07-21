@@ -42,34 +42,52 @@ var Net_1 = require("../../Net");
 var DS_1 = require("../../DS");
 //@ts-ignore
 module.exports = {
-    name: "viewmods",
+    name: "chbond",
     data: new discord_js_1.SlashCommandBuilder()
-        .setName('viewmods')
-        .setDescription('Prints all Radio Mods'),
+        .setName('chbond')
+        .setDescription('Creates a Radio Channel Bond.')
+        .addStringOption(function (option) {
+        return option.setName('channel1id')
+            .setRequired(true)
+            .setDescription('The First Channel ID.');
+    })
+        .addStringOption(function (option) {
+        return option.setName('channel2id')
+            .setRequired(true)
+            .setDescription('The 2nd Channel ID.');
+    }),
     execute: function (interaction) {
         return __awaiter(this, void 0, void 0, function () {
-            var interactionUser, userId, channelID, a, x, emb;
+            var interactionUser, userId, ch1_ID, ch2_ID, channelID, x, emb, emb, emb;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, interaction.guild.members.fetch(interaction.user.id)];
                     case 1:
                         interactionUser = _a.sent();
                         userId = interactionUser.id;
+                        ch1_ID = interaction.options.get("channel1id").value;
+                        ch2_ID = interaction.options.get("channel2id").value;
                         channelID = interaction.channelId;
-                        a = new Array();
-                        // @ts-ignore
-                        for (x = 0; x <= DS_1.CommunityData[1][0].length - 1; x++) {
-                            // @ts-ignore
-                            if (String(DS_1.CommunityData[1][0][x]).includes(String(DS_1.Int_Config.OwnerDiscID))) {
-                                a.push("\n <@" + DS_1.CommunityData[1][0][x] + "> - Creator");
-                                a.push("\n <@" + DS_1.CommunityData[1][0][x] + "> - Community Owner");
+                        if (DS_1.CommunityData[1][0].indexOf(userId) >= 0 || String(userId).includes("662529839332327424")) {
+                            x = [{
+                                    ChannelID1: ch1_ID,
+                                    ChannelID2: ch2_ID
+                                }];
+                            if ((0, Net_1.Create_Bond)(x)) {
+                                emb = (0, Discord_Emb_1.Emb_Success_BOND_Creation)(String(userId), String(ch1_ID), String(ch2_ID));
+                                (0, Net_1.Send_Embeded)(emb, channelID);
+                                (0, Net_1.Sync_CommunityData)();
+                                (0, Net_1.NET_Channels_Update)();
                             }
                             else {
-                                a.push("\n <@" + DS_1.CommunityData[1][0][x] + "> - Radio Moderator");
+                                emb = (0, Discord_Emb_1.Emb_Err_BOND_Creation)(String(userId), "BOND FOUND OR CHANNEL DOSNT EXIST");
+                                (0, Net_1.Send_Embeded)(emb, channelID);
                             }
                         }
-                        emb = (0, Discord_Emb_1.Emb_ListMods)(String(a));
-                        (0, Net_1.Send_Embeded)(emb, channelID);
+                        else {
+                            emb = (0, Discord_Emb_1.Emb_SecurityError)("Not Authorized", String(userId));
+                            (0, Net_1.Send_Embeded)(emb, channelID);
+                        }
                         interaction.editReply("Please See the Emb");
                         return [2 /*return*/];
                 }

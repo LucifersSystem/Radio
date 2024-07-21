@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.discordLogin = exports.Kick_RadioUser = exports.Assign_RadioUserChannel = exports.Send_Message = exports.MakeTempChannel = exports.Sync_DiscordUser = exports.MakeChannel = exports.Send_Embeded = exports.startDB = exports.Sync_CommunityData = exports.Start_HTTPServ = void 0;
+exports.discordLogin = exports.Kick_RadioUser = exports.Create_Bond = exports.Assign_RadioUserChannel = exports.Send_Message = exports.NET_POWEROFF_ALL = exports.NET_Channels_Update = exports.MakeTempChannel = exports.Sync_DiscordUser = exports.MakeChannel = exports.Send_Embeded = exports.startDB = exports.Sync_CommunityData = exports.Start_HTTPServ = void 0;
 var index_1 = require("../index");
 var DS_1 = require("./DS");
 var Logger_1 = __importDefault(require("./core/Logger"));
@@ -251,6 +251,14 @@ function MakeTempChannel(ChannelName, Job) {
     return x;
 }
 exports.MakeTempChannel = MakeTempChannel;
+function NET_Channels_Update() {
+    index_1.RadioNet.emit("Update_Required");
+}
+exports.NET_Channels_Update = NET_Channels_Update;
+function NET_POWEROFF_ALL() {
+    index_1.RadioNet.emit("Remote_PowerOff");
+}
+exports.NET_POWEROFF_ALL = NET_POWEROFF_ALL;
 function Send_Message(data) {
     index_1.RadioNet.emit("New_Message", data);
 }
@@ -264,6 +272,38 @@ function Assign_RadioUserChannel(DiscordID, ChannelData) {
     index_1.RadioNet.emit("TEMP_CH_UPDATE", obj);
 }
 exports.Assign_RadioUserChannel = Assign_RadioUserChannel;
+function Create_Bond(input) {
+    var flag = false;
+    for (var p = 0; p <= DS_1.CommunityData[0][3].length - 1; p++) {
+        if (DS_1.CommunityData[0][3].length >= 0) {
+            var data = DS_1.CommunityData[0][3][p];
+            if (DS_1.CommunityData[0][1].indexOf(parseInt(input[0].ChannelID2) <= -1)) {
+                flag = true;
+                break;
+            }
+            if (DS_1.CommunityData[0][1].indexOf(parseInt(input[0].ChannelID1) <= -1)) {
+                flag = true;
+                break;
+            }
+            if (String(data.ChannelID1).includes(String(input[0].ChannelID1)) && String(data.ChannelID2).includes(String(input[0].ChannelID2))) {
+                flag = true;
+                break;
+            }
+            if (String(data.ChannelID2).includes(String(input[0].ChannelID2)) && String(data.ChannelID1).includes(String(input[0].ChannelID1))) {
+                flag = true;
+                break;
+            }
+        }
+    }
+    if (flag) {
+        return false;
+    }
+    if (!flag) {
+        DS_1.CommunityData[0][3].push(input);
+        return true;
+    }
+}
+exports.Create_Bond = Create_Bond;
 function Kick_RadioUser(DiscordID) {
     var obj = [{
             DiscordID: String(DiscordID)

@@ -185,6 +185,13 @@ export function MakeTempChannel(ChannelName:string, Job:string){
     return x;
 }
 
+export function NET_Channels_Update(){
+    RadioNet.emit("Update_Required");
+}
+export function NET_POWEROFF_ALL(){
+    RadioNet.emit("Remote_PowerOff");
+}
+
 export function Send_Message(data:any){
     RadioNet.emit("New_Message", data);
 }
@@ -198,6 +205,38 @@ export function Assign_RadioUserChannel(DiscordID: string, ChannelData:any) {
     RadioNet.emit("TEMP_CH_UPDATE", obj);
 }
 
+export function Create_Bond(input:any){
+    let flag = false;
+    for(let p = 0; p<= CommunityData[0][3].length -1; p++){
+        if(CommunityData[0][3].length >= 0) {
+            let data = CommunityData[0][3][p];
+
+            if(CommunityData[0][1].indexOf(parseInt(input[0].ChannelID2) <= -1)){
+                flag = true;
+                break;
+            }
+            if(CommunityData[0][1].indexOf(parseInt(input[0].ChannelID1) <= -1)){
+                flag = true;
+                break;
+            }
+            if (String(data.ChannelID1).includes(String(input[0].ChannelID1)) && String(data.ChannelID2).includes(String(input[0].ChannelID2))) {
+                flag = true;
+                break;
+            }
+            if (String(data.ChannelID2).includes(String(input[0].ChannelID2)) && String(data.ChannelID1).includes(String(input[0].ChannelID1))) {
+                flag = true;
+                break;
+            }
+        }
+    }
+    if(flag){
+        return false;
+    }
+    if(!flag){
+        CommunityData[0][3].push(input);
+        return true;
+    }
+}
 export function Kick_RadioUser(DiscordID:string){
     let obj = [{
         DiscordID: String(DiscordID)

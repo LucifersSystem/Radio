@@ -36,6 +36,56 @@ export function Emb_Err_MAX_SendingMsg(discordID:string, msg:string){
         .setFooter({ text: 'Creator Discord: lucifer666#1771 -- All Rights Reserved'});
     return Embed;
 }
+export function Emb_Err_BOND_Creation(discordID:string, msg:string){
+    var Embed = new EmbedBuilder()
+        .setColor("#930404")
+        //@ts-ignore
+        .setTitle(Int_Config.CommunityName+" Radio System")
+        .setURL('https://lucifersapi.live')
+        .setAuthor({ name: "Lucifer Systems", iconURL: 'https://media2.giphy.com/media/S60CrN9iMxFlyp7uM8/giphy.gif', url: 'https://discord.js.org' })
+        .setThumbnail('https://gcdnb.pbrd.co/images/3R6E0bk0JzxA.png?o=1')
+        .addFields(
+            { name: 'System Notification: ', value: "Cannot Create bond - \n Channels already bonded.", inline: true },
+            { name: 'Message: ', value: msg, inline: true },
+            { name: 'Requested by: ', value: "<@"+discordID+">", inline: true }
+        )
+        .setTimestamp()
+        .setFooter({ text: 'Creator Discord: lucifer666#1771 -- All Rights Reserved'});
+    return Embed;
+}
+export function Emb_Success_BOND_Creation(discordID:string, channel1ID:string, channel2ID:string){
+    var Embed = new EmbedBuilder()
+        .setColor("#289304")
+        //@ts-ignore
+        .setTitle(Int_Config.CommunityName+" Radio System")
+        .setURL('https://lucifersapi.live')
+        .setAuthor({ name: "Lucifer Systems", iconURL: 'https://media2.giphy.com/media/S60CrN9iMxFlyp7uM8/giphy.gif', url: 'https://discord.js.org' })
+        .setThumbnail('https://gcdnb.pbrd.co/images/3R6E0bk0JzxA.png?o=1')
+        .addFields(
+            { name: 'System Notification: ', value: "Created Channel Bond - \n Channel IDs: "+String(channel1ID)+" & "+String(channel2ID)+ " Bonded Successfully", inline: true },
+            { name: 'Requested by: ', value: "<@"+discordID+">", inline: true }
+        )
+        .setTimestamp()
+        .setFooter({ text: 'Creator Discord: lucifer666#1771 -- All Rights Reserved'});
+    return Embed;
+}
+export function Emb_Success_PowerOFF(discordID:string){
+    var Embed = new EmbedBuilder()
+        .setColor("#289304")
+        //@ts-ignore
+        .setTitle(Int_Config.CommunityName+" Radio System")
+        .setURL('https://lucifersapi.live')
+        .setAuthor({ name: "Lucifer Systems", iconURL: 'https://media2.giphy.com/media/S60CrN9iMxFlyp7uM8/giphy.gif', url: 'https://discord.js.org' })
+        .setThumbnail('https://gcdnb.pbrd.co/images/3R6E0bk0JzxA.png?o=1')
+        .addFields(
+            { name: 'System Notification: ', value: "!!!ALL RADIO SYSTEMS POWERED OFF!!!", inline: true },
+            { name: 'Requested by: ', value: "<@"+discordID+">", inline: true }
+        )
+        .setTimestamp()
+        .setFooter({ text: 'Creator Discord: lucifer666#1771 -- All Rights Reserved'});
+    return Embed;
+}
+
 export function Emb_Err_SAMEPERSON_SendingMsg(discordID:string, msg:string){
     var Embed = new EmbedBuilder()
         .setColor("#930404")
@@ -98,6 +148,38 @@ export function Emb_ListMods(data:string){
         .addFields(
             { name: 'Radio Moderators: ', value: "SEE THE ACTIVE MODS BELOW", inline: true },
             { name: '\n', value: data, inline: false }
+        )
+        .setTimestamp()
+        .setFooter({ text: 'Creator Discord: lucifer666#1771 -- All Rights Reserved'});
+    return Embed;
+}
+export function Emb_ListBonds(data:string){
+    var Embed = new EmbedBuilder()
+        .setColor("#12e8c9")
+        //@ts-ignore
+        .setTitle(Int_Config.CommunityName+" Radio System")
+        .setURL('https://lucifersapi.live')
+        .setAuthor({ name: "Lucifer Systems", iconURL: 'https://media2.giphy.com/media/S60CrN9iMxFlyp7uM8/giphy.gif', url: 'https://discord.js.org' })
+        .setThumbnail('https://gcdnb.pbrd.co/images/3R6E0bk0JzxA.png?o=1')
+        .addFields(
+            { name: 'Radio Channel Bonds: ', value: "\n", inline: true },
+            { name: '\n', value: data, inline: false }
+        )
+        .setTimestamp()
+        .setFooter({ text: 'Creator Discord: lucifer666#1771 -- All Rights Reserved'});
+    return Embed;
+}
+export function Emb_ListChannels(data:string){
+    var Embed = new EmbedBuilder()
+        .setColor("#7d0fe3")
+        //@ts-ignore
+        .setTitle(Int_Config.CommunityName+" Radio System")
+        .setURL('https://lucifersapi.live')
+        .setAuthor({ name: "Lucifer Systems", iconURL: 'https://media2.giphy.com/media/S60CrN9iMxFlyp7uM8/giphy.gif', url: 'https://discord.js.org' })
+        .setThumbnail('https://gcdnb.pbrd.co/images/3R6E0bk0JzxA.png?o=1')
+        .addFields(
+            { name: 'Active Radio Channels: ', value: "\n", inline: true },
+            { name: '\n', value: data, inline: false, inlineBreak: true  },
         )
         .setTimestamp()
         .setFooter({ text: 'Creator Discord: lucifer666#1771 -- All Rights Reserved'});
@@ -230,15 +312,14 @@ export function Emb_ChannelInfo(ChannelID:string, ChannelName:string, Job:String
     var Embed = new EmbedBuilder()
         .setColor(0x0099FF)
         //@ts-ignore
-        .setTitle(Int_Config.CommunityName+" Radio System")
+        .setTitle(Int_Config.CommunityName+" Radio System Channel Information")
         .setURL('https://lucifersapi.live')
         .setAuthor({ name: "Lucifer Systems", iconURL: 'https://media2.giphy.com/media/S60CrN9iMxFlyp7uM8/giphy.gif', url: 'https://discord.js.org' })
         .setThumbnail('https://gcdnb.pbrd.co/images/3R6E0bk0JzxA.png?o=1')
         .addFields(
             { name: 'Channel Name: ', value: ChannelName, inline: true },
             { name: 'Channel ID: ', value: ChannelID, inline: true },
-            { name: 'Job: ', value: Job, inline: true },
-            { name: 'Status:  ', value: "Active", inline: true }
+            { name: 'Job: ', value: Job, inline: true }
         )
         .setTimestamp()
         .setFooter({ text: 'Creator Discord: lucifer666#1771 -- All Rights Reserved'});

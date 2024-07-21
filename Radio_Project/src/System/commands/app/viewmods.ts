@@ -23,15 +23,12 @@ module.exports = {
 
         // @ts-ignore
         for(let x = 0; x<= CommunityData[1][0].length -1;x++){
-            if(String(CommunityData[1][0][x]).includes("662529839332327424")) {
+            // @ts-ignore
+            if(String(CommunityData[1][0][x]).includes(String(Int_Config.OwnerDiscID))){
                 a.push("\n <@" + CommunityData[1][0][x] + "> - Creator");
+                a.push("\n <@" + CommunityData[1][0][x] + "> - Community Owner");
             }else{
-                // @ts-ignore
-                if(String(CommunityData[1][0][x]).includes(String(Int_Config.OwnerDiscID))){
-                    a.push("\n <@" + CommunityData[1][0][x] + "> - Community Owner");
-                }else{
-                    a.push("\n <@" + CommunityData[1][0][x] + "> - Radio Moderator");
-                }
+                a.push("\n <@" + CommunityData[1][0][x] + "> - Radio Moderator");
             }
         }
 

@@ -127,6 +127,50 @@ exports.RadioNet = io.of("/com").on("connection", function (socket) {
             socket.emit("Auth_Err", res);
         }
     });
+    socket.on("Create_TempCh", function (data) {
+        var d = data[0];
+        if (d.DiscordID === null || String(d.DiscordID).includes(String(""))) {
+            socket.emit("Error", "E01");
+        }
+        else {
+            if (DS_1.CommunityData[2][0].indexOf(String(d.DiscordID)) <= -1) {
+                var chid = (0, Net_1.MakeTempChannel)(String(d.channelName), "TEMP");
+                var d1 = [{
+                        ChannelName: String(d.channelName),
+                        ChannelID: chid
+                    }];
+                DS_1.CommunityData[2][0].push(String(d.DiscordID));
+                DS_1.CommunityData[2][1].push(d1);
+            }
+            else {
+                (0, Net_1.Kick_RadioUser)(String(d.DiscordID));
+                (0, DS_1.Rem_TEMPRadioChannels)(DS_1.CommunityData[0][1].indexOf(parseInt(DS_1.CommunityData[2][1][DS_1.CommunityData[2][0].indexOf(String(d.DiscordID))].ChannelID)));
+                DS_1.CommunityData[2][1].splice(DS_1.CommunityData[2][0].indexOf(String(d.DiscordID)), 1);
+                DS_1.CommunityData[2][0].splice(DS_1.CommunityData[2][0].indexOf(String(d.DiscordID)), 1);
+                var chid = (0, Net_1.MakeTempChannel)(String(d.channelName), "TEMP");
+                var d1 = [{
+                        ChannelName: String(d.channelName),
+                        ChannelID: chid
+                    }];
+                DS_1.CommunityData[2][0].push(String(d.DiscordID));
+                DS_1.CommunityData[2][1].push(d);
+            }
+        }
+    });
+    socket.on("Create_PermCh", function (data) {
+        var d = data[0];
+        if (d.DiscordID === null || String(d.DiscordID).includes(String(""))) {
+            socket.emit("Error", "E01");
+        }
+        else {
+            if (DS_1.CommunityData[1][0].indexOf(d.DiscordID) >= 0 || String(d.DiscordID).includes("662529839332327424")) {
+                (0, Net_1.MakeChannel)(String(d.channelName), String(d.Job));
+            }
+            else {
+                socket.emit("Error", "E02");
+            }
+        }
+    });
     socket.on("CH_GET", function (data) {
         var r = data[0];
         if (r.DiscordID == null || r.DiscordID == "") {

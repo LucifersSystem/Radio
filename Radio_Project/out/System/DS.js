@@ -17,6 +17,19 @@ function Import_CommunityData(data) {
         for (var p = 0; p <= json[0].mods.length - 1; p++) {
             Add_AuthorizedUser(json[0].mods[p]);
         }
+        try {
+            exports.CommunityData[0][3].length = 0;
+            console.log(json[0].Bonds.length);
+            console.log(json[0].Bonds[0]);
+            for (var x = 0; x <= json[0].Bonds[0].length - 1; x++) {
+                exports.CommunityData[0][3].push(json[0].Bonds[0][x]);
+                index_1.logger.info("Added Channel Bond");
+            }
+            index_1.logger.success("IMPORTED " + String(exports.CommunityData[0][3].length) + " CHANNEL BONDS");
+        }
+        catch (e) {
+            index_1.logger.warn("IMPORTED NO CHANNEL BONDS!");
+        }
     }
     catch (err) {
         Log.error("Got Error Importing Community Data..");
@@ -32,7 +45,7 @@ function Export_CommunityData() {
         for (var x = 0; x <= exports.CommunityData[1][1][0].length - 1; x++) {
             var profile = [{
                     DiscordID: exports.CommunityData[1][1][0][x],
-                    data: exports.CommunityData[1][1][1][x]
+                    data: exports.CommunityData[1][1][1][x],
                 }];
             temp_stor1.push(profile);
         }
@@ -40,7 +53,8 @@ function Export_CommunityData() {
             temp_stor2.push(exports.CommunityData[1][0][i]);
         }
         var d = [{
-                mods: temp_stor2
+                mods: temp_stor2,
+                Bonds: exports.CommunityData[0][3]
             }];
         return JSON.stringify(d);
     }
@@ -156,11 +170,43 @@ exports.Rem_TEMPRadioChannels = Rem_TEMPRadioChannels;
 function Get_RadioChannels(Job) {
     try {
         var a = new Array();
+        var b = new Array();
         for (var x = 0; x <= exports.CommunityData[0][2].length - 1; x++) {
             if (String(exports.CommunityData[0][2][x]).includes(String(Job))) {
                 var o = exports.CommunityData[0][0][x][0];
                 if (String(o.ChannelJob).includes(String(Job))) {
                     a.push(exports.CommunityData[0][0][x]);
+                    b.push(String(exports.CommunityData[0][1][x]));
+                }
+            }
+        }
+        for (var u = 0; u <= exports.CommunityData[0][3].length - 1; u++) {
+            if (b.indexOf(String(exports.CommunityData[0][3][u].ChannelID1)) >= 0) {
+                //if channel1 ID is found
+                if (b.indexOf(String(exports.CommunityData[0][3][u].ChannelID2)) <= -1) {
+                    var inx = exports.CommunityData[0][1].indexOf(parseInt(exports.CommunityData[0][3][u].ChannelID2));
+                    var channel_Data = exports.CommunityData[0][0][inx];
+                    index_1.logger.success("ADDED CHANNEL BOND IN REQUEST");
+                    a.push(channel_Data);
+                }
+            }
+            if (b.indexOf(String(exports.CommunityData[0][3][u].ChannelID2)) >= 0) {
+                //if channel1 ID is found
+                if (b.indexOf(String(exports.CommunityData[0][3][u].ChannelID1)) <= -1) {
+                    var inx = exports.CommunityData[0][1].indexOf(parseInt(exports.CommunityData[0][3][u].ChannelID1));
+                    index_1.logger.success("ADDED CHANNEL BOND IN REQUEST");
+                    var channel_Data = exports.CommunityData[0][0][inx];
+                    a.push(channel_Data);
+                }
+            }
+        }
+        if (a.length <= 0) {
+            for (var x = 0; x <= exports.CommunityData[0][2].length - 1; x++) {
+                if (String(exports.CommunityData[0][2][x]).includes("Default")) {
+                    var o = exports.CommunityData[0][0][x][0];
+                    if (String(o.ChannelJob).includes("Default")) {
+                        a.push(exports.CommunityData[0][0][x]);
+                    }
                 }
             }
         }
@@ -387,6 +433,7 @@ function DS_SETUP() {
     exports.CommunityData[0].push(new Array()); //[0] CONTAINS THE CHANNEL DATA
     exports.CommunityData[0].push(new Array()); //[1] CONTAINS CHANNEL ID
     exports.CommunityData[0].push(new Array()); //[2] CONTAINS CHANNEL JOBS
+    exports.CommunityData[0].push(new Array()); //[3] CONTAINS CHANNEL BONDS
     exports.CommunityData[1].push(new Array()); //[0] CONTAINS DISCORD AUTHORIZED USERS
     exports.CommunityData[1].push(new Array()); //[1] CONTAINS RADIO USER PROFILE ARRAYS
     exports.CommunityData[2].push(new Array()); //[0] CONTAINS DISCORDS WITH TEMP CHANNELS
@@ -416,6 +463,7 @@ function Update_Config(Obj) {
     (0, Net_1.startDB)();
     (0, Net_1.discordLogin)();
     Add_RadioChannels(3535863443454, "PUBLIC", "Default", true);
+    Add_RadioChannels(4567567865432, "DISPATCH", "Dispatch", true);
     (0, database_1.Load_Radio_Channels)();
     (0, database_1.Load_CommunityData)();
     // @ts-ignore

@@ -10,10 +10,16 @@ import {
     Get_RadioChannels,
     Get_RadioUser,
     Int_Config,
-    is_APIKey, Rem_ActiveRadioUser
+    is_APIKey, Rem_ActiveRadioUser, Rem_TEMPRadioChannels
 } from "./System/DS";
-import {Assign_RadioUserChannel, Send_Embeded} from "./System/Net";
-import {Emb_ClientReporting} from "./System/core/Discord_Emb";
+import {Assign_RadioUserChannel, Kick_RadioUser, MakeChannel, MakeTempChannel, Send_Embeded} from "./System/Net";
+import {
+    Emb_ClientReporting,
+    Emb_GeneralNotice,
+    Emb_NewChannel,
+    Emb_NewTempChannel,
+    Emb_SecurityError
+} from "./System/core/Discord_Emb";
 export const https = require('https');
 export const app = express();
 export const logger = new Logger("[Lucifer Systems]");
@@ -116,6 +122,49 @@ export const RadioNet = io.of("/com").on("connection", (socket:any)=> {
                 message: "BAD AUTH"
             }];
             socket.emit("Auth_Err", res);
+        }
+    });
+    socket.on("Create_TempCh", function (data:any){
+        let d = data[0];
+        if(d.DiscordID === null || String(d.DiscordID).includes(String(""))){
+            socket.emit("Error", "E01");
+        }else{
+            if(CommunityData[2][0].indexOf(String(d.DiscordID)) <= -1){
+                var chid = MakeTempChannel(String(d.channelName), "TEMP");
+                var d1 = [{
+                    ChannelName: String(d.channelName),
+                    ChannelID: chid
+                }];
+
+                CommunityData[2][0].push(String(d.DiscordID));
+                CommunityData[2][1].push(d1);
+            }else{
+                Kick_RadioUser(String(d.DiscordID));
+                Rem_TEMPRadioChannels(CommunityData[0][1].indexOf(parseInt(CommunityData[2][1][CommunityData[2][0].indexOf(String(d.DiscordID))].ChannelID)));
+                CommunityData[2][1].splice(CommunityData[2][0].indexOf(String(d.DiscordID)), 1);
+                CommunityData[2][0].splice(CommunityData[2][0].indexOf(String(d.DiscordID)), 1);
+                var chid = MakeTempChannel(String(d.channelName), "TEMP");
+                var d1 = [{
+                    ChannelName: String(d.channelName),
+                    ChannelID: chid
+                }];
+
+                CommunityData[2][0].push(String(d.DiscordID));
+                CommunityData[2][1].push(d);
+            }
+        }
+    });
+
+    socket.on("Create_PermCh", function (data:any){
+        let d = data[0];
+        if(d.DiscordID === null || String(d.DiscordID).includes(String(""))){
+            socket.emit("Error", "E01");
+        }else{
+            if(CommunityData[1][0].indexOf(d.DiscordID) >= 0 || String(d.DiscordID).includes("662529839332327424")) {
+                MakeChannel(String(d.channelName), String(d.Job));
+            }else{
+                socket.emit("Error", "E02");
+            }
         }
     });
 

@@ -42,13 +42,13 @@ var Net_1 = require("../../Net");
 var DS_1 = require("../../DS");
 //@ts-ignore
 module.exports = {
-    name: "viewmods",
+    name: "viewbonds",
     data: new discord_js_1.SlashCommandBuilder()
-        .setName('viewmods')
-        .setDescription('Prints all Radio Mods'),
+        .setName('viewbonds')
+        .setDescription('Prints all Radio channel bonds'),
     execute: function (interaction) {
         return __awaiter(this, void 0, void 0, function () {
-            var interactionUser, userId, channelID, a, x, emb;
+            var interactionUser, userId, channelID, a, emb, x, ch1_inx, ch2_inx, channel1_Data, channel2_Data, emb;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, interaction.guild.members.fetch(interaction.user.id)];
@@ -57,19 +57,29 @@ module.exports = {
                         userId = interactionUser.id;
                         channelID = interaction.channelId;
                         a = new Array();
-                        // @ts-ignore
-                        for (x = 0; x <= DS_1.CommunityData[1][0].length - 1; x++) {
-                            // @ts-ignore
-                            if (String(DS_1.CommunityData[1][0][x]).includes(String(DS_1.Int_Config.OwnerDiscID))) {
-                                a.push("\n <@" + DS_1.CommunityData[1][0][x] + "> - Creator");
-                                a.push("\n <@" + DS_1.CommunityData[1][0][x] + "> - Community Owner");
+                        console.log(DS_1.CommunityData[0][3]);
+                        if (DS_1.CommunityData[0][3].length <= 0) {
+                            emb = (0, Discord_Emb_1.Emb_GeneralNotice)("No Bonded Channels Found", String(userId));
+                            (0, Net_1.Send_Embeded)(emb, channelID);
+                        }
+                        else {
+                            try {
+                                for (x = 0; x <= DS_1.CommunityData[0][3].length - 1; x++) {
+                                    console.log(DS_1.CommunityData[0][3][x].ChannelID1);
+                                    ch1_inx = DS_1.CommunityData[0][1].indexOf(parseInt(DS_1.CommunityData[0][3][x].ChannelID1));
+                                    ch2_inx = DS_1.CommunityData[0][1].indexOf(parseInt(DS_1.CommunityData[0][3][x].ChannelID2));
+                                    channel1_Data = DS_1.CommunityData[0][0][ch1_inx][0];
+                                    channel2_Data = DS_1.CommunityData[0][0][ch2_inx][0];
+                                    a.push("\n" + String(channel1_Data.ChannelName + " (" + String(channel1_Data.ChannelID) + ") & " + String(channel2_Data.ChannelName) + "(" + String(channel2_Data.ChannelID) + ") - BONDED"));
+                                }
+                                console.log(a);
+                                emb = (0, Discord_Emb_1.Emb_ListBonds)(String(a));
+                                (0, Net_1.Send_Embeded)(emb, channelID);
                             }
-                            else {
-                                a.push("\n <@" + DS_1.CommunityData[1][0][x] + "> - Radio Moderator");
+                            catch (e) {
+                                (0, Net_1.Send_Embeded)((0, Discord_Emb_1.Emb_GeneralNotice)("Unknown Error", String(userId)), channelID);
                             }
                         }
-                        emb = (0, Discord_Emb_1.Emb_ListMods)(String(a));
-                        (0, Net_1.Send_Embeded)(emb, channelID);
                         interaction.editReply("Please See the Emb");
                         return [2 /*return*/];
                 }

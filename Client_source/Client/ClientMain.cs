@@ -37,7 +37,7 @@ namespace LucifersRadio.Client
         protected internal static Action<string, string, string> Drawgps;
         protected internal static Action<string, int> SetJOB;
 
-
+        bool canTalk = false;
         bool isinVeh = false;
         bool isDevMode = false;
         bool isRadioActive = false;
@@ -252,6 +252,11 @@ namespace LucifersRadio.Client
                             CurrChannel = 0;
                             MaxChannels = 0;
                             break;
+                        case "voiceverify":
+                            bool vv_res = Boolean.Parse(data["isv"].ToString());
+                            canTalk = vv_res;
+                            isAllowedVoice(canTalk);
+                            break;
                     }
                 }catch(Exception e)
                 {
@@ -269,6 +274,7 @@ namespace LucifersRadio.Client
         {
             await Delay(2000);
         }
+
 
         private async Task Vehicle_Check()
         {
@@ -291,6 +297,28 @@ namespace LucifersRadio.Client
                     }
                 }
                 await BaseScript.Delay(100);
+            }
+        }
+
+        public void isAllowedVoice(bool v)
+        {
+            try
+            {
+                if (!v)
+                {
+                    Debug.WriteLine("Voice is NOT Enabled");
+                    Screen.ShowNotification("YOUR VOICE IS NOT ENABLED, RADIO DISABLED");
+                    isInit = true;
+                    isRadioActive = true;
+                    PowerOff();
+                }
+                else
+                {
+                    Debug.WriteLine("Voice is Enabled");
+                }
+            }catch(Exception e)
+            {
+                Error_Post(e);
             }
         }
         public void isAutherized_Setup()
@@ -746,7 +774,24 @@ namespace LucifersRadio.Client
                 Error_Post(e);
             }
         }
-        
+
+        [Command("voiceverify")]
+        public void voiceverify()
+        {
+            try
+            {
+                var data = new
+                {
+                    msgType = "voiceverify"
+                };
+                SEND_NUI(data);
+            }
+            catch (Exception e)
+            {
+                Error_Post(e);
+            }
+        }
+
         [Command("radio")]
         public void RadioCommand()
         {

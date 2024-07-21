@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LuciferSystems.Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2c5f686a37d728e27552248016bb0e6da57f7769")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+517bb3ce46fc7129f4bd16d4f3afda614fed7d56")]
 [assembly: System.Reflection.AssemblyProductAttribute("LuciferSystems.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LuciferSystems.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

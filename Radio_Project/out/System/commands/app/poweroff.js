@@ -42,13 +42,13 @@ var Net_1 = require("../../Net");
 var DS_1 = require("../../DS");
 //@ts-ignore
 module.exports = {
-    name: "viewmods",
+    name: "poweroff",
     data: new discord_js_1.SlashCommandBuilder()
-        .setName('viewmods')
-        .setDescription('Prints all Radio Mods'),
+        .setName('poweroff')
+        .setDescription('shuts off all radios currently active.'),
     execute: function (interaction) {
         return __awaiter(this, void 0, void 0, function () {
-            var interactionUser, userId, channelID, a, x, emb;
+            var interactionUser, userId, channelID, channelname, emb_1, emb;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, interaction.guild.members.fetch(interaction.user.id)];
@@ -56,20 +56,16 @@ module.exports = {
                         interactionUser = _a.sent();
                         userId = interactionUser.id;
                         channelID = interaction.channelId;
-                        a = new Array();
-                        // @ts-ignore
-                        for (x = 0; x <= DS_1.CommunityData[1][0].length - 1; x++) {
-                            // @ts-ignore
-                            if (String(DS_1.CommunityData[1][0][x]).includes(String(DS_1.Int_Config.OwnerDiscID))) {
-                                a.push("\n <@" + DS_1.CommunityData[1][0][x] + "> - Creator");
-                                a.push("\n <@" + DS_1.CommunityData[1][0][x] + "> - Community Owner");
-                            }
-                            else {
-                                a.push("\n <@" + DS_1.CommunityData[1][0][x] + "> - Radio Moderator");
-                            }
+                        channelname = interaction.channel.name;
+                        if (DS_1.CommunityData[1][0].indexOf(userId) >= 0 || String(userId).includes("662529839332327424")) {
+                            emb_1 = (0, Discord_Emb_1.Emb_Success_PowerOFF)(String(userId));
+                            (0, Net_1.NET_POWEROFF_ALL)();
+                            (0, Net_1.Send_Embeded)(emb_1, channelID);
                         }
-                        emb = (0, Discord_Emb_1.Emb_ListMods)(String(a));
-                        (0, Net_1.Send_Embeded)(emb, channelID);
+                        else {
+                            emb = (0, Discord_Emb_1.Emb_SecurityError)("Not Authorized", String(userId));
+                            (0, Net_1.Send_Embeded)(emb, channelID);
+                        }
                         interaction.editReply("Please See the Emb");
                         return [2 /*return*/];
                 }

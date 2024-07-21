@@ -48,7 +48,7 @@ module.exports = {
         .setDescription('Deletes a Radio Channel and Instantly syncs for your community.'),
     execute: function (interaction) {
         return __awaiter(this, void 0, void 0, function () {
-            var interactionUser, userId, discord_channelID, x, channelID, channelName, ChannelJob, emb;
+            var interactionUser, userId, discord_channelID, a, x, channelID, channelName, ChannelJob, emb;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, interaction.guild.members.fetch(interaction.user.id)];
@@ -56,6 +56,7 @@ module.exports = {
                         interactionUser = _a.sent();
                         userId = interactionUser.id;
                         discord_channelID = interaction.channelId;
+                        a = new Array();
                         for (x = 0; x <= DS_1.CommunityData[0][1].length - 1; x++) {
                             channelID = String(DS_1.CommunityData[0][1][x]);
                             channelName = String(DS_1.CommunityData[0][0][DS_1.CommunityData[0][1].indexOf(parseInt(channelID))][0].ChannelName);
@@ -64,10 +65,11 @@ module.exports = {
                                 //ignore for temp channels
                             }
                             else {
-                                emb = (0, Discord_Emb_1.Emb_ChannelInfo)(channelID, channelName, ChannelJob);
+                                emb = (0, Discord_Emb_1.Emb_ChannelInfo)(String(channelID), String(String(channelName)), String(ChannelJob));
                                 (0, Net_1.Send_Embeded)(emb, discord_channelID);
                             }
                         }
+                        console.log(a);
                         interaction.editReply("Please See the Emb");
                         return [2 /*return*/];
                 }

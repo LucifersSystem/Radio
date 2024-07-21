@@ -43,8 +43,36 @@
                 $('body').append(local_media);
                 attachMediaStream(local_media[0], stream);
                 local_media_stream.getAudioTracks()[0].enabled = false;
+                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: JSON.stringify({
+                        msgType: 'voiceverify',
+                        isv:"true"
+                    })
+                }).then(resp => resp.json()).then(resp => function (){
+                    if(Is_Debug){
+                        console.log(resp);
+                    }
+                });
             },
             function() { /* user denied access to a/v */
+                fetch(`https://${GetParentResourceName()}/radiodata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: JSON.stringify({
+                        msgType: 'voiceverify',
+                        isv:"false"
+                    })
+                }).then(resp => resp.json()).then(resp => function (){
+                    if(Is_Debug){
+                        console.log(resp);
+                    }
+                });
                 console.log("Access denied for audio/video");
             });
     </script>
@@ -456,6 +484,48 @@
                             break;
                         case "setVol":
                             currentVolume = event.data.volume / 100;
+                            break;
+                        case "voiceverify":
+                            navigator.getUserMedia({"audio":true, "video":false},
+                                function(stream) { /* user accepted access to a/v */
+                                    local_media_stream = stream;
+                                    const local_media = $(`<audio style='display:none'>`);
+                                    local_media.attr("muted", "true"); /* always mute ourselves by default */
+                                    $('body').append(local_media);
+                                    attachMediaStream(local_media[0], stream);
+                                    local_media_stream.getAudioTracks()[0].enabled = false;
+                                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json; charset=UTF-8',
+                                        },
+                                        body: JSON.stringify({
+                                            msgType: 'voiceverify',
+                                            isv:"true"
+                                        })
+                                    }).then(resp => resp.json()).then(resp => function (){
+                                        if(Is_Debug){
+                                            console.log(resp);
+                                        }
+                                    });
+                                },
+                                function() { /* user denied access to a/v */
+                                    fetch(`https://${GetParentResourceName()}/radiodata`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json; charset=UTF-8',
+                                        },
+                                        body: JSON.stringify({
+                                            msgType: 'voiceverify',
+                                            isv:"false"
+                                        })
+                                    }).then(resp => resp.json()).then(resp => function (){
+                                        if(Is_Debug){
+                                            console.log(resp);
+                                        }
+                                    });
+                                    console.log("Access denied for audio/video");
+                                });
                             break;
                         case "JTC":
                             let Input_Index_SELUSER = event.data.indx;
