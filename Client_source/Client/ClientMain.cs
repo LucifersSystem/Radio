@@ -37,6 +37,7 @@ namespace LucifersRadio.Client
         protected internal static Action<string, string, string> Drawgps;
         protected internal static Action<string, int> SetJOB;
 
+        bool NoClientScript = false;
         bool canTalk = false;
         bool isinVeh = false;
         bool isDevMode = false;
@@ -642,6 +643,84 @@ namespace LucifersRadio.Client
 
             }
         }
+
+        [Command("policeradio")]
+        public void policeradio()
+        {
+            try
+            {
+                if (NoClientScript)
+                {
+                    Screen.ShowNotification("Set your radio job too: Police");
+                    var data = new
+                    {
+                        msgType = "setJob",
+                        Char_Job = "Police"
+                    };
+                    SEND_NUI(data);
+                }
+                else
+                {
+                    Screen.ShowNotification("This Command is Currently Disabled");
+                }
+            }catch(Exception e)
+            {
+                Error_Post(e);
+            }
+        }
+
+        [Command("rescueradio")]
+        public void rescueradio()
+        {
+            try
+            {
+                if (NoClientScript)
+                {
+                    Screen.ShowNotification("Set your radio job too: Rescue");
+                    var data = new
+                    {
+                        msgType = "setJob",
+                        Char_Job = "Rescue"
+                    };
+                    SEND_NUI(data);
+                }
+                else
+                {
+                    Screen.ShowNotification("This Command is Currently Disabled");
+                }
+            }
+            catch (Exception e)
+            {
+                Error_Post(e);
+            }
+        }
+        
+        [Command("dispatchradio")]
+        public void dispatchradio()
+        {
+            try
+            {
+                if (NoClientScript)
+                {
+                    Screen.ShowNotification("Set your radio job too: Dispatch");
+                    var data = new
+                    {
+                        msgType = "setJob",
+                        Char_Job = "Dispatch"
+                    };
+                    SEND_NUI(data);
+                }
+                else
+                {
+                    Screen.ShowNotification("This Command is Currently Disabled");
+                }
+            }
+            catch (Exception e)
+            {
+                Error_Post(e);
+            }
+        }
+
         [Command("volDOWN")]
         public void Lower_Vol()
         {

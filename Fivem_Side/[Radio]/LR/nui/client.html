@@ -7,7 +7,7 @@
         let currentVolume=1;
         let RadioServerIP = "127.0.0.1";
         let RadioServerPort = "1000";
-        let CommunityAPIKey = "6551c6f3-ef12-4c74-8e81-8b3d9f5df00b";
+        let CommunityAPIKey = "575431c6f3-ef12-4c74-8e81-8b3d9f5df00b";
 
         let Priority_on = "http://"+RadioServerIP+":"+RadioServerPort+"/sounds/priority/on.mp3"
         let Ptt_on = "http://"+RadioServerIP+":"+RadioServerPort+"/sounds/ptt/on.mp3"
@@ -161,6 +161,14 @@
                     }]
                     _Notification_NS.emit("Auth", o);
 
+                }else{
+                    var o = [{
+                        Key: CommunityAPIKey,
+                        DiscordID: DiscordID,
+                        FiveMID: FivemLicense,
+                        CurrJob: "Public"
+                    }]
+                    _Notification_NS.emit("Auth", o);
                 }
             });
             _Notification_NS.on('connect_error', function (){

@@ -20,3 +20,6 @@ server_scripts {
 'LuciferSystems.Server.net.dll'
 }
 ui_page 'nui/client.html'
+
+
+--IF NO CLIENT SCRIPT IS PRESENT ALLOW SELF JOBS BOOL IN SOURCE CODE FOR DEFAULT COMMANDS
