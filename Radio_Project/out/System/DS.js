@@ -178,6 +178,10 @@ function Get_RadioChannels(Job) {
                     a.push(exports.CommunityData[0][0][x]);
                     b.push(String(exports.CommunityData[0][1][x]));
                 }
+                if (String(o.ChannelJob).includes(String("Default"))) {
+                    a.push(exports.CommunityData[0][0][x]);
+                    b.push(String(exports.CommunityData[0][1][x]));
+                }
             }
         }
         for (var u = 0; u <= exports.CommunityData[0][3].length - 1; u++) {

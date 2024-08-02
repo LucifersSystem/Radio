@@ -166,6 +166,11 @@ export function Get_RadioChannels(Job:string){
                     b.push(String(CommunityData[0][1][x]));
                 }
 
+                if (String(o.ChannelJob).includes(String("Default"))) {
+                    a.push(CommunityData[0][0][x]);
+                    b.push(String(CommunityData[0][1][x]));
+                }
+
             }
         }
         for(let u = 0; u<= CommunityData[0][3].length -1;u++){
